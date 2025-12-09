@@ -1,6 +1,77 @@
-<p class="codepen" data-height="300" data-default-tab="html,result" data-slug-hash="kQNEvr" data-pen-title="Hacker-Style loading" data-user="szrooel" style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
-      <span>See the Pen <a href="https://codepen.io/szrooel/pen/kQNEvr">
-  Hacker-Style loading</a> by Ahmet (<a href="https://codepen.io/szrooel">@szrooel</a>)
-  on <a href="https://codepen.io">CodePen</a>.</span>
-      </p>
-      <script async src="https://public.codepenassets.com/embed/index.js"></script>
+<html>
+<style>      
+body {
+  background: #111;
+  color: #411;
+  font-family: Consolas, Courier, monospace;
+  font-size: 60px;
+  text-shadow: 0 0 15px #411;
+  height: 100%;
+}
+
+div {
+  position: relative;
+  top: 50%;
+  margin: -30px auto;
+  text-align: center;
+}
+
+.glow {
+  color: #f00;
+  text-shadow: 0px 0px 10px #f00;
+}
+
+span {
+  display: inline-block;
+  padding: 0 10px;
+}
+</style>      
+<script>
+alphabet = new Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0");
+letter_count = 0;
+el = $("#loading");
+word = el.html().trim();
+finished = false;
+
+el.html("");
+for (var i = 0; i < word.length; i++) {
+  el.append("<span>"+word.charAt(i)+"</span>");
+}
+
+setTimeout(write, 75);
+incrementer = setTimeout(inc, 1000);
+
+function write() {
+  for (var i = letter_count; i < word.length; i++) {
+    var c = Math.floor(Math.random() * 36);
+    $("span")[i].innerHTML = alphabet[c];
+  }
+  if (!finished) {
+    setTimeout(write, 75);
+  }
+}
+
+function inc() {
+  $("span")[letter_count].innerHTML = word[letter_count];
+  $("span:eq("+letter_count+")").addClass("glow");
+  letter_count++;
+  if (letter_count >= word.length) {
+    finished = true;
+    setTimeout(reset, 1500);
+  } else {
+    setTimeout(inc, 1000);
+  }
+}
+
+function reset() {
+  letter_count = 0;
+  finished = false;
+  setTimeout(inc, 1000);
+  setTimeout(write, 75);
+  $("span").removeClass("glow");
+}
+</script> 
+<body>
+      <div id="loading"> LOADING</div>
+</body>      
+</html>      
