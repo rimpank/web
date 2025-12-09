@@ -10,7 +10,6 @@
     <noscript><!-- // <link rel="stylesheet" href="style.css"> // --> </noscript>
     <noscript><!-- // <script type="text/javascript" nonce="d3b20ca2f0bc4ab58a08732cbfb" src="//local.adguard.org?ts=1765242208503&amp;type=content-script&amp;dmn=cdpn.io&amp;url=https%3A%2F%2Fcdpn.io%2Fszrooel%2Ffullpage%2FnNNrjy%3Fview%3D&amp;app=com.google.Chrome&amp;css=2&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="d3b20ca2f0bc4ab58a08732cbfb" src="//local.adguard.org?ts=1765242208503&amp;name=AdGuard%20Extra&amp;type=user-script"></script><link rel="apple-touch-icon" type="image/png" href="https://cpwebassets.codepen.io/assets/favicon/apple-touch-icon-5ae1a0698dcc2402e9712f7d01ed509a57814f994c660df9f7a952f3060705ee.png" /> // --> </noscript>
     <noscript><!-- // <script src="script.js"></script> // --></noscript>
-
 <style>
 body, html, #app {
   margin: 0;
@@ -81,6 +80,33 @@ h2 {
     <h2>to our site</h2>
     <a target="_blank" href="https://www.dwi-nanto.web.id/">Dwi Nanto</a>
   </div>
+  <script>
+import TubesCursor from "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js"
+
+const app = TubesCursor(document.getElementById('canvas'), {
+  tubes: {
+    colors: ["#f967fb", "#53bc28", "#6958d5"],
+    lights: {
+      intensity: 200,
+      colors: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"]
+    }
+  }
+})
+
+document.body.addEventListener('click', () => {
+  const colors = randomColors(3)
+  const lightsColors = randomColors(4)
+  console.log(colors, lightsColors)
+  app.tubes.setColors(colors)
+  app.tubes.setLightsColors(lightsColors)
+})
+
+function randomColors (count) {
+    return new Array(count)
+        .fill(0)
+        .map(() => "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'))
+}
+  </script>  
 </div>
 </body>
 </html>
