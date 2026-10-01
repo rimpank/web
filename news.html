@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>News Update</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .post { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        h2 a { color: #0066cc; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Berita Terbaru</h1>
+    <div id="blog-content">Memuat konten...</div>
+
+    <script>
+        const blogURL = "https://blog.rimpang.my.id/"; // Ganti dengan URL Blogspot Anda
+        const apiURL = blogURL + "/feeds/posts/default?alt=json&max-results=5";
+
+        fetch(apiURL)
+            .then(response => response.json())
+            .then(data => {
+                const entries = data.feed.entry;
+                let output = "";
+                
+                entries.forEach(entry => {
+                    const title = entry.title.\$t;
+                    const content = entry.content.\$t;
+                    const postUrl = entry.link.find(l => l.rel === 'alternate').href;
+                    
+                    output += `
+                        <div class="post">
+                            <h2><a href="${postUrl}" target="_blank">${title}</a></h2>
+                            <div>${content}</div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById("blog-content").innerHTML = output;
+            })
+            .catch(error => {
+                document.getElementById("blog-content").innerText = "Gagal memuat konten.";
+            });
+    </script>
+</body>
+</html>
