@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Update</title>
+    <title>Blog Saya - GitHub Frontend</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://tailwindcss.com"></script>
 </head>
@@ -13,10 +13,8 @@
     <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <a href="#" class="text-2xl font-bold text-blue-600 tracking-tight">BlogModern</a>
-            <nav class="space-x-6 hidden sm:flex">
+            <nav class="space-x-6">
                 <a href="#" class="text-gray-600 hover:text-blue-600 transition">Home</a>
-                <a href="#" class="text-gray-600 hover:text-blue-600 transition">Tentang</a>
-                <a href="#" class="text-gray-600 hover:text-blue-600 transition">Kontak</a>
             </nav>
         </div>
     </header>
@@ -25,115 +23,119 @@
     <main class="max-w-6xl mx-auto px-4 py-12">
         <div class="text-center mb-12">
             <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">Artikel Terbaru</h1>
-            <p class="mt-3 text-lg text-gray-500">Kumpulan tulisan dan tutorial yang diperbarui secara otomatis.</p>
+            <p class="mt-3 text-lg text-gray-500">Kumpulan tulisan yang diperbarui secara otomatis dari Blogspot.</p>
         </div>
 
         <!-- Grid Container untuk Daftar Ringkasan Artikel -->
         <div id="blog-content" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <!-- Efek Loading Statis -->
-            <div class="animate-pulse bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <div class="h-48 bg-gray-200 rounded-xl mb-4"></div>
-                <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-            </div>
+            <p class="col-span-full text-center text-gray-500">Menghubungkan dan memuat artikel...</p>
         </div>
     </main>
 
-<!-- JavaScript Penghubung yang Sudah Diperbaiki untuk Custom Domain -->
-<script>
-    // 1. MASUKKAN CUSTOM DOMAIN ANDA DI SINI
-    const customDomain = "https://blog.rimpang.my.id"; 
+    <!-- JavaScript Penghubung -->
+    <script>
+        // ================= CONFIGURATION =================
+        // 1. Masukkan Custom Domain aktif Anda di sini (contoh: https://bloganda.com)
+        const customDomain = "https://blog.rimpang.my.id"; 
 
-    // 2. Mengakali CORS dengan menembak langsung subdomain backend Google asli
-    // Ganti 'nama-blog-asli-anda' dengan nama ID sebelum Anda custom domain
-    const bloggerBackupURL = "https://blog.rimpang.my.id"; 
-    
-    // Gabungkan dengan parameter feed
-    const apiURL = bloggerBackupURL + "/feeds/posts/default?alt=json&max-results=6";
+        // 2. Masukkan alamat asli .blogspot.com Anda sebelum di-custom domain
+        // (contoh: https://blogspot.com)
+        const bloggerBackupURL = "https://blogrimpang.blogspot.com"; 
+        // =================================================
 
-    fetch(apiURL)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Respons jaringan tidak oke");
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data.feed || !data.feed.entry) {
-                document.getElementById("blog-content").innerHTML = `<p class="col-span-full text-center text-gray-500">Belum ada artikel.</p>`;
-                return;
-            }
+        // Pemanggilan API menggunakan URL backend blogspot agar terhindar dari CORS error
+        const apiURL = bloggerBackupURL + "/feeds/posts/default?alt=json&max-results=6";
 
-            const entries = data.feed.entry;
-            let output = "";
-            
-            entries.forEach(entry => {
-                const title = entry.title.\$t; // Menghilangkan backslash eror (\)
+        fetch(apiURL)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Gagal merespons server Blogger. Status: " + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.feed || !data.feed.entry) {
+                    document.getElementById("blog-content").innerHTML = `
+                        <p class="col-span-full text-center text-gray-500">Belum ada artikel yang diterbitkan di Blogspot.</p>`;
+                    return;
+                }
+
+                const entries = data.feed.entry;
+                let output = "";
                 
-                // Mengambil Link Artikel Asli
-                const alternateLink = entry.link.find(l => l.rel === 'alternate');
-                let postUrl = alternateLink ? alternateLink.href : "#";
+                entries.forEach(entry => {
+                    // Mengambil Judul Artikel
+                    const title = entry.title.\$t;
+                    
+                    // Mengambil Link Asli
+                    const alternateLink = entry.link.find(l => l.rel === 'alternate');
+                    let postUrl = alternateLink ? alternateLink.href : "#";
+                    
+                    // Mengarahkan Link agar otomatis menggunakan Custom Domain Anda
+                    if (postUrl.includes(".blogspot.com")) {
+                        try {
+                            const path = new URL(postUrl).pathname;
+                            postUrl = customDomain.replace(/\/\$/, "") + path;
+                        } catch(e) {
+                            console.error("Gagal mengubah domain url", e);
+                        }
+                    }
 
-                // PERBAIKAN LINK: Jika link masih mengarah ke .blogspot.com, paksa ganti ke Custom Domain Anda
-                if (postUrl.includes("blog.rimpang.my.id")) {
-                    const path = new URL(postUrl).pathname;
-                    postUrl = customDomain + path;
-                }
-                
-                // Format Tanggal Terbit
-                const publishedDate = new Date(entry.published.\$t).toLocaleDateString('id-ID', {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                });
+                    // Format Tanggal Terbit
+                    const publishedDate = new Date(entry.published.\$t).toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
 
-                // Mengambil Ringkasan Konten (Snippet)
-                let snippet = "";
-                if (entry.summary && entry.summary.\$t) {
-                    snippet = entry.summary.\$t;
-                } else if (entry.content && entry.content.\$t) {
-                    snippet = entry.content.\$t.replace(/<[^>]*>/g, '');
-                }
-                snippet = snippet.substring(0, 100) + "...";
+                    // Mengambil Ringkasan Konten (Snippet)
+                    let snippet = "";
+                    if (entry.summary && entry.summary.\$t) {
+                        snippet = entry.summary.\$t;
+                    } else if (entry.content && entry.content.\$t) {
+                        snippet = entry.content.\$t.replace(/<[^>]*>/g, ''); 
+                    }
+                    snippet = snippet.substring(0, 100) + "..."; 
 
-                // Mengambil Gambar Thumbnail Utama
-                let thumbnailUrl = "https://unsplash.com"; 
-                if (entry.media\$thumbnail) {
-                    thumbnailUrl = entry.media\$thumbnail.url.replace('/s72-c/', '/s400/');
-                }
+                    // Mengambil Gambar Thumbnail Utama
+                    let thumbnailUrl = "https://unsplash.com"; 
+                    if (entry.media\(thumbnail && entry.media\)thumbnail.url) {
+                        thumbnailUrl = entry.media\$thumbnail.url.replace('/s72-c/', '/s400/');
+                    }
 
-                // Render HTML Card Template
-                output += `
-                    <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300 flex flex-col">
-                        <div class="h-48 overflow-hidden bg-gray-100">
-                            <img src="${thumbnailUrl}" alt="${title}" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">${publishedDate}</span>
-                            <h2 class="text-xl font-bold text-gray-900 line-clamp-2 hover:text-blue-600 transition mb-3">
-                                <a href="${postUrl}" target="_blank">${title}</a>
-                            </h2>
-                            <p class="text-gray-600 text-sm line-clamp-3 mb-6 flex-grow">${snippet}</p>
-                            <div class="mt-auto">
-                                <a href="${postUrl}" target="_blank" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
-                                    Baca Selengkapnya &rarr;
-                                </a>
+                    // Render ke HTML Card
+                    output += `
+                        <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300 flex flex-col">
+                            <div class="h-48 overflow-hidden bg-gray-100">
+                                <img src="${thumbnailUrl}" alt="${title}" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
                             </div>
-                        </div>
-                    </article>
-                `;
+                            <div class="p-6 flex flex-col flex-grow">
+                                <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">${publishedDate}</span>
+                                <h2 class="text-xl font-bold text-gray-900 line-clamp-2 hover:text-blue-600 transition mb-3">
+                                    <a href="${postUrl}" target="_blank">${title}</a>
+                                </h2>
+                                <p class="text-gray-600 text-sm line-clamp-3 mb-6 flex-grow">${snippet}</p>
+                                <div class="mt-auto">
+                                    <a href="${postUrl}" target="_blank" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                        Baca Selengkapnya &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                });
+                
+                document.getElementById("blog-content").innerHTML = output;
+            })
+            .catch(error => {
+                console.error("Error Detail:", error);
+                document.getElementById("blog-content").innerHTML = `
+                    <div class="col-span-full text-center p-6 bg-red-50 border border-red-200 rounded-xl">
+                        <p class="text-red-600 font-medium mb-1">Gagal Memuat Konten</p>
+                        <p class="text-gray-600 text-sm mb-3">Terjadi masalah saat mengambil data dari Blogger.</p>
+                        <p class="text-xs text-gray-400 bg-white p-2 rounded border inline-block text-left font-mono">${error.message}</p>
+                    </div>`;
             });
-            
-            document.getElementById("blog-content").innerHTML = output;
-        })
-        .catch(error => {
-            console.error("Error detail:", error);
-            document.getElementById("blog-content").innerHTML = `
-                <div class="col-span-full text-center p-6 bg-red-50 border border-red-200 rounded-xl">
-                    <p class="text-red-600 font-medium mb-1">Gagal Menghubungkan Konten (CORS/Domain Blocked)</p>
-                    <p class="text-gray-500 text-sm">Pastikan setelan Feed Situs di Blogger Anda tetap diatur ke <b>'Penuh'</b>.</p>
-                </div>`;
-        });
-</script>
-   
+    </script>
 </body>
 </html>
